@@ -6,19 +6,20 @@ from transformers import *
 import torch
 from sklearn.metrics import accuracy_score
 import torch.nn.functional as F
+from simbert.datasets.processor import DataProcessor
 
 
 class BertForRanking(Model, pl.LightningModule):
-    # y = это преобразованный label для расчета под binary_cross_entropy_with_logits,
-    # для cross_entropy ставишь label в loss функцию
-    def __init__(self, configs: dict):
-        super(BertForRanking, self).__init__()
 
-        self.bert = BertModel.from_pretrained('D:/tmp/debug_squad')
+    def __init__(self, configs: dict):
+        super().__init__(configs)
+        self.tokenizer = BertTokenizer.from_pretrained(
+            self.configs.get('bert_tokenizer', 'bert-base-multilingual-cased'))
+        self.bert = BertModel.from_pretrained(self.configs.get('bert_model', 'bert-base-multilingual-cased'))
         self.classifier = nn.Linear(self.bert.config.hidden_size, 2)
         self.num_classes = 2
         self.sigmoid = nn.Sigmoid()
-
+        self.DataProcessor = DataProcessor().get(self.configs.data_processor.name)(self.configs.data_processor)
 
     def forward(self, input_ids, attention_mask, token_type_ids):
 
@@ -94,12 +95,13 @@ class BertForRanking(Model, pl.LightningModule):
         return {'avg_test_acc': avg_test_acc, 'log': tensorboard_logs, 'progress_bar': tensorboard_logs}
 
     def configure_optimizers(self):
-        return torch.optim.Adam([p for p in self.parameters() if p.requires_grad], lr=2e-05, eps=1e-08)
+        return torch.optim.Adam([p for p in self.parameters() if p.requires_grad], lr=self.configs.learning_rate,
+                                eps=self.configs.epsilon)
 
     @pl.data_loader
     def train_dataloader(self):
-        return bert_rank_train_dataloader
+        return self.train_dataset
 
     @pl.data_loader
     def val_dataloader(self):
-        return bert_rank_val_dataloader
+        return self.val_dataset

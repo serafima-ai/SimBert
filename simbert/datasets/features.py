@@ -1,7 +1,8 @@
 from simbert.kernel import Kernel
 
 
-class Processor(Kernel):
+class FeaturesProcessor(Kernel):
+    configs = None
 
-    def __init__(self, config: dict):
-        config['models_path'] = config.get("models_path", "/simbert_models/")
+    def convert_examples_to_features(self, data, tokenizer):
+        pass

@@ -6,13 +6,12 @@ import torch
 
 class BertForQA(Model, TransformerModel):
 
-    tokenizer = None
-    model = None
-
     def __init__(self, configs: dict):
         super().__init__(configs)
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased')  # e.g. bert-base-multilingual-cased
-        self.model = BertForQuestionAnswering.from_pretrained('D:/tmp/debug_squad')     # path to pretrained model
+        self.tokenizer = BertTokenizer.from_pretrained(
+            self.configs.get('bert_tokenizer', 'bert-base-multilingual-cased'))  # e.g. bert-base-multilingual-cased
+        self.model = BertForQuestionAnswering.from_pretrained(
+            self.configs.get('bert_model', 'distilbert-base-cased-distilled-squad'))  # path to pretrained model
 
     def predict(self, question: str, context: str) -> dict:
 

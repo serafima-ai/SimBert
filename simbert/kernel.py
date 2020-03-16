@@ -12,7 +12,7 @@ class Kernel:
     def __init_subclass__(cls, **kwargs):
         print(cls.__name__)
         super().__init_subclass__(**kwargs)
-        cls.items.update({cls.__name__.lower(): cls})
+        cls.items.update({cls.__name__[0].lower() + cls.__name__[1:]: cls})
 
     def get(self, item):
         try:
