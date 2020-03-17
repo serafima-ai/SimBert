@@ -1,4 +1,5 @@
 import pytorch_lightning as pl
+from dotmap import DotMap
 from torch import nn
 
 from simbert.models.model import Model
@@ -11,15 +12,16 @@ from simbert.datasets.processor import DataProcessor
 
 class BertForRanking(Model, pl.LightningModule):
 
-    def __init__(self, configs: dict):
-        super().__init__(configs)
+    def __init__(self, configs: DotMap = None):
+        pl.LightningModule.__init__(self)
+        Model.__init__(self, configs)
         self.tokenizer = BertTokenizer.from_pretrained(
             self.configs.get('bert_tokenizer', 'bert-base-multilingual-cased'))
         self.bert = BertModel.from_pretrained(self.configs.get('bert_model', 'bert-base-multilingual-cased'))
         self.classifier = nn.Linear(self.bert.config.hidden_size, 2)
         self.num_classes = 2
         self.sigmoid = nn.Sigmoid()
-        self.DataProcessor = DataProcessor().get(self.configs.data_processor.name)(self.configs.data_processor)
+        self.DataProcessor = DataProcessor().get(self.configs.dataset.processor.name)(self.configs.dataset.processor)
 
     def forward(self, input_ids, attention_mask, token_type_ids):
 

@@ -1,3 +1,4 @@
+from dotmap import DotMap
 from transformers import BertTokenizer, BertForQuestionAnswering
 from simbert.models.transformers import TransformerModel
 from simbert.models.model import Model
@@ -6,7 +7,7 @@ import torch
 
 class BertForQA(Model, TransformerModel):
 
-    def __init__(self, configs: dict):
+    def __init__(self, configs: DotMap = None):
         super().__init__(configs)
         self.tokenizer = BertTokenizer.from_pretrained(
             self.configs.get('bert_tokenizer', 'bert-base-multilingual-cased'))  # e.g. bert-base-multilingual-cased

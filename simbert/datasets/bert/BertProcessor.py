@@ -1,3 +1,4 @@
+from dotmap import DotMap
 from torch.utils.data import random_split, DataLoader, RandomSampler
 from transformers.data.processors.utils import InputExample
 from simbert.datasets.processor import DataProcessor

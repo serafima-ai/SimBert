@@ -1,4 +1,5 @@
 import torch
+from dotmap import DotMap
 from torch.utils.data import TensorDataset
 
 from simbert.kernel import Kernel
@@ -7,15 +8,14 @@ import pandas as pd
 
 
 class DataProcessor(Kernel):
-    configs = None
-
     FeaturesProcessor = None
 
-    def __init__(self, configs=None):
-        if configs is None:
-            configs = {}
+    def __init__(self, configs: DotMap = DotMap()):
         self.configs = configs
-        self.FeaturesProcessor = FeaturesProcessor().get(configs.features.processor_name)(configs.features)
+
+        if type(self.configs.features.features_processor_name) is not DotMap:
+            self.FeaturesProcessor = FeaturesProcessor().get(self.configs.features.features_processor_name)(
+                self.configs.features)
 
     def get_train_examples(self, df):
         pass

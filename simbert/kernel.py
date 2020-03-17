@@ -3,8 +3,7 @@ from simbert.datasets import *
 from simbert.configs import process
 
 
-class Kernel:
-
+class Kernel(object):
     items = {}
 
     get_key_error = "{}.get(): no class named {} was found"
@@ -12,9 +11,10 @@ class Kernel:
     def __init_subclass__(cls, **kwargs):
         print(cls.__name__)
         super().__init_subclass__(**kwargs)
-        cls.items.update({cls.__name__[0].lower() + cls.__name__[1:]: cls})
+        cls.items.update({cls.__name__: cls})
 
     def get(self, item):
+        item = prepare_name(item)
         try:
             return self.items[item]
         except KeyError:
@@ -22,4 +22,6 @@ class Kernel:
             return None
 
 
-
+def prepare_name(name: str) -> str:
+    print("Kernel", name)
+    return name.split('.')[-1]

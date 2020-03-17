@@ -1,10 +1,11 @@
+from dotmap import DotMap
+
 from simbert.kernel import Kernel
 from simbert.models import *
 
 
 class Model(Kernel):
-
-    configs = {}
+    configs = None
 
     train_dataset = None
 
@@ -18,8 +19,10 @@ class Model(Kernel):
 
     model = None
 
-    def __init__(self, configs: dict):
-        configs['models_path'] = configs.get("models_path", "/simbert_models/")
+    def __init__(self, configs: DotMap = None):
+        if configs is not None:
+            configs['models_path'] = configs.get("models_path", "/simbert_models/")
+        self.configs = configs
 
     def evaluate(self):
         pass

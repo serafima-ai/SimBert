@@ -5,7 +5,7 @@ from simbert.kernel import Kernel
 parser = argparse.ArgumentParser()
 
 parser.add_argument("mode", help="select a mode, train or interact", type=str,
-                    choices={'train', 'evaluate', 'interact', 'predict', 'download', 'install', 'crossval'})
+                    choices={'train', 'evaluate', 'interact', 'predict', 'download', 'install'})
 parser.add_argument("config_path", help="path to a pipeline json config", type=str)
 
 
