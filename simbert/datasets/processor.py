@@ -24,7 +24,7 @@ class DataProcessor(Kernel):
         pass
 
     def get_dataset(self, path='') -> pd.DataFrame:
-        path = self.configs.get('train_path', path)
+        path = self.configs.get('train_dataset', path)
         return pd.read_csv(path, index_col=0)  # path: './ranker/train.csv'
 
     def prepare_dataset(self, tokenizer):

@@ -8,6 +8,9 @@ class Kernel(object):
 
     get_key_error = "{}.get(): no class named {} was found"
 
+    def __init__(self):
+        self.items = {}
+
     def __init_subclass__(cls, **kwargs):
         print(cls.__name__)
         super().__init_subclass__(**kwargs)

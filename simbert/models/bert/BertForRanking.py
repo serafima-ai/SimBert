@@ -8,6 +8,7 @@ import torch
 from sklearn.metrics import accuracy_score
 import torch.nn.functional as F
 from simbert.datasets.processor import DataProcessor
+from simbert.optimizers.optimizer import Optimizer
 
 
 class BertForRanking(Model, pl.LightningModule):
@@ -16,7 +17,7 @@ class BertForRanking(Model, pl.LightningModule):
         pl.LightningModule.__init__(self)
         Model.__init__(self, configs)
         self.tokenizer = BertTokenizer.from_pretrained(
-            self.configs.get('bert_tokenizer', 'bert-base-multilingual-cased'))
+            self.configs.get('tokenizer', 'bert-base-multilingual-cased'))
         self.bert = BertModel.from_pretrained(self.configs.get('bert_model', 'bert-base-multilingual-cased'))
         self.classifier = nn.Linear(self.bert.config.hidden_size, 2)
         self.num_classes = 2
@@ -97,8 +98,8 @@ class BertForRanking(Model, pl.LightningModule):
         return {'avg_test_acc': avg_test_acc, 'log': tensorboard_logs, 'progress_bar': tensorboard_logs}
 
     def configure_optimizers(self):
-        return torch.optim.Adam([p for p in self.parameters() if p.requires_grad], lr=self.configs.learning_rate,
-                                eps=self.configs.epsilon)
+        return Optimizer().get(self.configs.optimizer.optimizer_name)(self.configs.optimizer).optimizer(
+            [p for p in self.parameters() if p.requires_grad])
 
     @pl.data_loader
     def train_dataloader(self):

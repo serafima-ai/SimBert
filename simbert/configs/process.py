@@ -2,11 +2,17 @@ import json
 from dotmap import DotMap
 
 
-def process_json_config(content_json: str = '', file: str = '') -> DotMap:
+def process_json_config(content_json: str = '', json_file: str = '') -> DotMap:
     content = DotMap()
 
     if content_json:
-        content = DotMap(parse_json(content_json))
+        content = parse_json(content_json)
+    elif json_file:
+        content = parse_json(parse_configs_file(json_file))
+    else:
+        return content
+
+    content = DotMap(content)
 
     packages = []
 
@@ -28,24 +34,17 @@ def find_packages(packages, content, key='', package=''):
             packages = find_packages(packages, entity, key, package)
 
     else:
-        if type(content) == str:
-            if 'name' in key:
-                package_name = 'simbert.{}.{}'.format(package, content)
+        if type(content) == str and 'name' in key:
+            package_name = 'simbert.{}.{}'.format(package, content)
 
-            else:
-                return packages
-
-        else:
-            package_name = 'simbert.{}.{}'.format(package, content['name'])
-
-        packages.append(clean_package_name(package_name))
+            packages.append(clean_package_name(package_name))
 
     return packages
 
 
 package_replacer = (
-("models.dataset", "datasets"), ("processor.features", "features"), ("datasets.features", "datasets"),
-("datasets.processor", "datasets"))
+    ("models.dataset", "datasets"), ("processor.features", "features"), ("datasets.features", "datasets"),
+    ("datasets.processor", "datasets"), ("models.optimizer", "optimizers"))
 
 
 def clean_package_name(name: str) -> str:
