@@ -18,19 +18,27 @@ class DataProcessor(Kernel):
                 self.configs.features)
 
     def get_train_examples(self, df):
+        """"""
         pass
 
     def get_dev_examples(self, df):
+        """"""
+        pass
+
+    def get_test_examples(self, df):
+        """"""
         pass
 
     def get_dataset(self, path='') -> pd.DataFrame:
-        path = self.configs.get('train_dataset', path)
+        if path is '':
+            path = self.configs.get('train_dataset', path)
         return pd.read_csv(path, index_col=0)  # path: './ranker/train.csv'
 
     def prepare_dataset(self, tokenizer):
+        """"""
         pass
 
-    def __create_tensor_dataset(self, features) -> TensorDataset:
+    def create_tensor_dataset(self, features) -> TensorDataset:
         return TensorDataset(torch.tensor([f.input_ids for f in features], dtype=torch.long),
                              torch.tensor([f.attention_mask for f in features], dtype=torch.long),
                              torch.tensor([f.token_type_ids for f in features], dtype=torch.long),
