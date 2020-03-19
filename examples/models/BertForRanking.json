@@ -1,0 +1,38 @@
+{
+  "models": [
+    {
+      "model_name": "bert.BertForRanking",
+      "tokenizer": "bert-base-multilingual-cased",
+      "bert_model": "bert-base-multilingual-cased",
+      "dataset": {
+        "processor": {
+          "data_processor_name": "bert.BertProcessor",
+          "train_dataset": "D:/Sima/ranker/train_ranker_dataset.csv",
+          "test_dataset": "D:/Sima/ranker/test_large_ranker_dataset.csv",
+          "input": [
+            "query",
+            "text"
+          ],
+          "output": [
+            "label"
+          ],
+          "batch_size": 4,
+          "train_set_proportion": 0.9,
+          "features": {
+            "features_processor_name": "bert.BertFeaturesProcessor",
+            "labels": [
+              0,
+              1
+            ],
+            "max_length": 368
+          }
+        }
+      },
+      "optimizer": {
+        "optimizer_name": "Adam",
+        "learning_rate": 2e-05,
+        "epsilon": 1e-08
+      }
+    }
+  ]
+}
