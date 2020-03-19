@@ -2,36 +2,76 @@ import pytorch_lightning as pl
 from dotmap import DotMap
 from torch import nn
 
+from simbert.models.lightning import SimbertLightningModule
 from simbert.models.model import Model
 from transformers import *
 import torch
 from sklearn.metrics import accuracy_score
-import torch.nn.functional as F
 from simbert.datasets.processor import DataProcessor
 from simbert.optimizers.optimizer import Optimizer
 
 
-class BertForRanking(Model, pl.LightningModule):
+class BertForRanking(Model, SimbertLightningModule):
 
-    def __init__(self, configs: DotMap = None):
-        pl.LightningModule.__init__(self)
+    def __init__(self, configs: DotMap = DotMap(), *args, **kwargs):
+        pl.LightningModule.__init__(self, *args, **kwargs)
         Model.__init__(self, configs)
-        self.tokenizer = BertTokenizer.from_pretrained(
-            self.configs.get('tokenizer', 'bert-base-multilingual-cased'))
-        self.bert = BertModel.from_pretrained(self.configs.get('bert_model', 'bert-base-multilingual-cased'))
-        self.classifier = nn.Linear(self.bert.config.hidden_size, 2)
-        self.num_classes = 2
+
+        self.bert = None
+        self.num_classes = 0
+        self.classifier = None
+        self.DataProcessor = None
+
+        self.apply_configs(self.configs)
+
         self.sigmoid = nn.Sigmoid()
-        self.DataProcessor = DataProcessor().get(self.configs.dataset.processor.name)(self.configs.dataset.processor)
+
+        if configs is not None:
+            self.DataProcessor = self.data_processor()
+
+    def __bert_model(self):
+        if self.bert is not None and self.configs.get('bert_model') is None:
+            return self.bert
+        return BertModel.from_pretrained(self.configs.get('bert_model', 'bert-base-multilingual-cased'))
+
+    def __calculate_classes(self):
+        if self.num_classes != 0 and self.configs.dataset.processor.features.get('labels') is None:
+            return self.num_classes
+        return len(self.configs.dataset.processor.features.labels)
+
+    def __classifier(self, num_classes=2):
+        num_classes = self.configs.get(num_classes, num_classes)
+        return nn.Linear(self.bert.config.hidden_size, num_classes)
+
+    def data_processor(self):
+        if self.DataProcessor is not None and self.configs.dataset.get(
+                'processor') is None or self.configs.dataset.processor.get('data_processor_name') is None:
+            return self.DataProcessor
+        return DataProcessor().get(self.configs.dataset.processor.data_processor_name)(
+            self.configs.dataset.processor)
+
+    def new_tokenizer(self):
+        if self.tokenizer is not None and self.configs.get('tokenizer') is None:
+            return self.tokenizer
+        return BertTokenizer.from_pretrained(
+            self.configs.get('tokenizer', 'bert-base-multilingual-cased'))
+
+    def apply_configs(self, configs: DotMap):
+        Model.apply_configs(self, configs)
+
+        self.bert = self.__bert_model()
+        self.num_classes = self.__calculate_classes()
+        self.classifier = self.__classifier()
 
     def forward(self, input_ids, attention_mask, token_type_ids):
+        outputs = self.bert(input_ids=input_ids,
+                            attention_mask=attention_mask,
+                            token_type_ids=token_type_ids)
 
-        h, _, attn = self.bert(input_ids=input_ids,
-                               attention_mask=attention_mask,
-                               token_type_ids=token_type_ids)
+        pooler_output, attn = outputs[1], outputs[-1]
 
-        h_cls = h[:, 0]
-        logits = self.classifier(h_cls)
+        logits = self.classifier(pooler_output)
+
         sigmoids = self.sigmoid(logits)
 
         return sigmoids, attn
@@ -42,13 +82,13 @@ class BertForRanking(Model, pl.LightningModule):
 
         # fwd
         y_hat, attn = self.forward(input_ids, attention_mask, token_type_ids)
-        y = torch.zeros(label.shape[0], 2, device=' cuda')
+        y = torch.zeros(label.shape[0], 2, device='cuda')
         y[range(y.shape[0]), label] = 1
 
         # loss
-        loss = F.binary_cross_entropy_with_logits(y_hat, y)
-
-        # loss = F.cross_entropy(y_hat, label)
+        # loss = F.binary_cross_entropy_with_logits(y_hat, y)
+        loss_func = nn.CrossEntropyLoss()
+        loss = loss_func(y_hat, label)
         # logs
         tensorboard_logs = {'train_loss': loss}
         return {'loss': loss, 'log': tensorboard_logs}
@@ -59,14 +99,15 @@ class BertForRanking(Model, pl.LightningModule):
 
         # fwd
         y_hat, attn = self.forward(input_ids, attention_mask, token_type_ids)
-        y = torch.zeros(label.shape[0], 2, device=' cuda')
+        y = torch.zeros(label.shape[0], 2, device='cuda')
         y[range(y.shape[0]), label] = 1
         # print(y_hat,'label',label,'new',y)
 
         # loss
-        loss = F.binary_cross_entropy_with_logits(y_hat, y)
+        # loss = F.binary_cross_entropy_with_logits(y_hat, y)
         # print(loss)
-        # loss = F.cross_entropy(y_hat, label)
+        loss_func = nn.CrossEntropyLoss()
+        loss = loss_func(y_hat, label)
         # acc
         a, y_hat = torch.max(y_hat, dim=1)
         val_acc = accuracy_score(y_hat.cpu(), label.cpu())
@@ -108,3 +149,13 @@ class BertForRanking(Model, pl.LightningModule):
     @pl.data_loader
     def val_dataloader(self):
         return self.val_dataset
+
+    @pl.data_loader
+    def test_dataloader(self):
+        return self.test_dataset
+
+    def train_model(self):
+        pass
+
+    def evaluate_model(self):
+        pass
