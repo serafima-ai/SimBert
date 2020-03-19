@@ -14,7 +14,8 @@ class BertForQA(Model, TransformerModel):
         self.model = BertForQuestionAnswering.from_pretrained(
             self.configs.get('bert_model', 'distilbert-base-cased-distilled-squad'))  # path to pretrained model
 
-    def predict(self, question: str, context: str) -> dict:
+    def predict(self, inputs: []) -> dict:
+        question, context = inputs[0]
 
         input_ids = self.tokenizer.encode(question, context)
 

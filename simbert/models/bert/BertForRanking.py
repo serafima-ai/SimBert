@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 from dotmap import DotMap
 from torch import nn
+from torch.utils.data import DataLoader
 
 from simbert.models.lightning import SimbertLightningModule
 from simbert.models.model import Model
@@ -62,6 +63,33 @@ class BertForRanking(Model, SimbertLightningModule):
         self.bert = self.__bert_model()
         self.num_classes = self.__calculate_classes()
         self.classifier = self.__classifier()
+
+    def predict(self, inputs):
+
+        examples = []
+
+        results = []
+
+        for sample in inputs:
+            query, paragraph = sample
+
+            examples.append(InputExample(text_a=query, text_b=paragraph, label=0, guid='prediction'))
+
+        features = self.DataProcessor.FeaturesProcessor.convert_examples_to_features(examples,
+                                                                                     tokenizer=self.tokenizer)
+
+        tokenized = self.DataProcessor.create_tensor_dataset(features)
+
+        bert_test_dataloader = DataLoader(tokenized)
+
+        for batch in bert_test_dataloader:
+            input_ids, attention_mask, token_type_ids, label = batch
+
+            results.append(
+                self.forward(input_ids=input_ids, attention_mask=attention_mask, token_type_ids=token_type_ids)[0][
+                    0].tolist())
+
+        return results
 
     def forward(self, input_ids, attention_mask, token_type_ids):
         outputs = self.bert(input_ids=input_ids,

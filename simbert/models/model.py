@@ -26,6 +26,10 @@ class Model(Kernel, metaclass=ABCMeta):
         self.configs = configs
 
     @abstractmethod
+    def predict(self, inputs):
+        """"""
+
+    @abstractmethod
     def evaluate_model(self):
         """"""
 

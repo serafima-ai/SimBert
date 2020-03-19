@@ -16,11 +16,9 @@ def process_json_config(content_json: str = '', json_file: str = '') -> DotMap:
 
     packages = []
 
-    print(content)
-
     for model in content.models:
         packages = find_packages(packages, model.toDict(), key='models')
-    print(packages)
+
     import_packages(packages)
 
     return content
