@@ -138,16 +138,20 @@ class BertForRanking(Model, SimbertLightningModule):
         loss = loss_func(y_hat, label)
         # acc
         a, y_hat = torch.max(y_hat, dim=1)
-        val_acc = accuracy_score(y_hat.cpu(), label.cpu())
-        val_acc = torch.tensor(val_acc)
 
-        return {'val_loss': loss, 'val_acc': val_acc}
+        return {**{'val_loss': loss}, **self.calculate_metrics(label.cpu(), y_hat.cpu(), stage='val',
+                                                               apply=lambda x: torch.tensor(x, dtype=torch.float64))}
 
     def validation_end(self, outputs):
         avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
-        avg_val_acc = torch.stack([x['val_acc'] for x in outputs]).mean()
 
-        tensorboard_logs = {'val_loss': avg_loss, 'avg_val_acc': avg_val_acc}
+        avg_metrics = {}
+
+        for _, metric in self.metrics.items():
+            key_name = 'val_' + metric.get_metric_name()
+            avg_metrics.update({'avg_' + key_name: torch.stack([x[key_name] for x in outputs]).mean()})
+
+        tensorboard_logs = {**{'val_loss': avg_loss}, **avg_metrics}
         return {'avg_val_loss': avg_loss, 'progress_bar': tensorboard_logs}
 
     def test_step(self, batch, batch_nb):
@@ -156,15 +160,21 @@ class BertForRanking(Model, SimbertLightningModule):
         y_hat, attn = self.forward(input_ids, attention_mask, token_type_ids)
 
         a, y_hat = torch.max(y_hat, dim=1)
-        test_acc = accuracy_score(y_hat.cpu(), label.cpu())
 
-        return {'test_acc': torch.tensor(test_acc)}
+        return self.calculate_metrics(label.cpu(), y_hat.cpu(), stage='test',
+                                      apply=lambda x: torch.tensor(x, dtype=torch.float64))
 
     def test_end(self, outputs):
-        avg_test_acc = torch.stack([x['test_acc'] for x in outputs]).mean()
 
-        tensorboard_logs = {'avg_test_acc': avg_test_acc}
-        return {'avg_test_acc': avg_test_acc, 'log': tensorboard_logs, 'progress_bar': tensorboard_logs}
+        avg_metrics = {}
+
+        for _, metric in self.metrics.items():
+            key_name = 'test_' + metric.get_metric_name()
+            avg_metrics.update({'avg_' + key_name: torch.stack([x[key_name] for x in outputs]).mean()})
+
+        tensorboard_logs = avg_metrics
+
+        return {**avg_metrics, **{'log': tensorboard_logs, 'progress_bar': tensorboard_logs}}
 
     def configure_optimizers(self):
         return Optimizer().get(self.configs.optimizer.optimizer_name)(self.configs.optimizer).optimizer(

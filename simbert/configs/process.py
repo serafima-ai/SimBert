@@ -29,15 +29,41 @@ def find_packages(packages, content, key='', package=''):
         package = key if package == '' else package + '.' + key
 
         for key, entity in content.items():
+
+            if key == 'metrics' and type(entity) == list:
+                entity = find_metric_packages(entity)
+
+            packages = find_packages(packages, entity, key, package)
+
+    elif type(content) is list:
+        if key == 'metrics':
+            package = key
+
+        for entity in content:
             packages = find_packages(packages, entity, key, package)
 
     else:
-        if type(content) == str and 'name' in key:
+        if type(content) == str and ('name' in key or key == 'metrics'):
             package_name = 'simbert.{}.{}'.format(package, content)
 
             packages.append(clean_package_name(package_name))
 
     return packages
+
+
+def find_metric_packages(content):
+    metric_packages = []
+
+    from simbert.metrics.metric import Metric
+
+    for metric in content:
+
+        name = Metric.get_class_name(metric)
+
+        if name is not '':
+            metric_packages.append(name)
+
+    return metric_packages
 
 
 package_replacer = (
