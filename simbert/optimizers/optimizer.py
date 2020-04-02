@@ -1,5 +1,5 @@
 from dotmap import DotMap
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from simbert.kernel import Kernel
 
 
