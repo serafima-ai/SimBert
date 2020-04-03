@@ -43,7 +43,7 @@ def find_packages(packages, content, key='', package=''):
             packages = find_packages(packages, entity, key, package)
 
     else:
-        if type(content) == str and ('name' in key or key == 'metrics'):
+        if type(content) == str and ('name' in key or key in ['metrics']):
             package_name = 'simbert.{}.{}'.format(package, content)
 
             packages.append(clean_package_name(package_name))
@@ -68,7 +68,7 @@ def find_metric_packages(content):
 
 package_replacer = (
     ("models.dataset", "datasets"), ("processor.features", "features"), ("datasets.features", "datasets"),
-    ("datasets.processor", "datasets"), ("models.optimizer", "optimizers"))
+    ("datasets.processor", "datasets"), ("models.optimizer", "optimizers"), ("models.loss", "losses"))
 
 
 def clean_package_name(name: str) -> str:

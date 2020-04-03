@@ -2,11 +2,11 @@ from dotmap import DotMap
 from abc import ABCMeta, abstractmethod
 
 from simbert.kernel import Kernel
+from simbert.losses.loss import Loss
 from simbert.metrics.metric import Metric
 
 
 class Model(Kernel, metaclass=ABCMeta):
-    configs = None
 
     metrics = {}
 
@@ -25,9 +25,14 @@ class Model(Kernel, metaclass=ABCMeta):
     def __init__(self, configs: DotMap = None):
         if configs is not None:
             configs['models_path'] = configs.get("models_path", "/simbert_models/")
+
         self.configs = configs
 
+        self.loss_func = None
+
         self.set_metrics()
+
+        self.set_loss_func()
 
     @abstractmethod
     def predict(self, inputs):
@@ -68,6 +73,17 @@ class Model(Kernel, metaclass=ABCMeta):
 
             if metric_class is not None:
                 self.metrics.update({metric: metric_class(name=metric)})
+
+    def set_loss_func(self, loss=None):
+        if loss is None and type(self.configs.loss.loss_func_name) is not DotMap:
+            loss = self.configs.loss.get('loss_func_name', 'CrossEntropyLoss')
+
+        L = Loss()
+
+        loss_class = L.get(loss)
+
+        if loss_class is not None:
+            self.loss_func = loss_class().criterion()
 
     def calculate_metrics(self, y_true, y_pred, stage='', apply=None) -> dict:
         validation_scores = {}
