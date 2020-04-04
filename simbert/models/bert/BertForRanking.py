@@ -7,7 +7,6 @@ from simbert.models.lightning import SimbertLightningModule
 from simbert.models.model import Model
 from transformers import *
 import torch
-from sklearn.metrics import accuracy_score
 from simbert.datasets.processor import DataProcessor
 from simbert.optimizers.optimizer import Optimizer
 
@@ -115,8 +114,7 @@ class BertForRanking(Model, SimbertLightningModule):
 
         # loss
         # loss = F.binary_cross_entropy_with_logits(y_hat, y)
-        loss_func = nn.CrossEntropyLoss()
-        loss = loss_func(y_hat, label)
+        loss = self.loss_func(y_hat, label)
         # logs
         tensorboard_logs = {'train_loss': loss}
         return {'loss': loss, 'log': tensorboard_logs}
@@ -134,8 +132,7 @@ class BertForRanking(Model, SimbertLightningModule):
         # loss
         # loss = F.binary_cross_entropy_with_logits(y_hat, y)
         # print(loss)
-        loss_func = nn.CrossEntropyLoss()
-        loss = loss_func(y_hat, label)
+        loss = self.loss_func(y_hat, label)
         # acc
         a, y_hat = torch.max(y_hat, dim=1)
 

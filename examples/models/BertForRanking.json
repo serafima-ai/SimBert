@@ -4,6 +4,9 @@
       "model_name": "bert.BertForRanking",
       "tokenizer": "bert-base-multilingual-cased",
       "bert_model": "bert-base-multilingual-cased",
+      "loss": {
+        "loss_func_name": "CrossEntropyLoss"
+      },
       "dataset": {
         "processor": {
           "data_processor_name": "bert.BertProcessor",
@@ -32,7 +35,12 @@
         "optimizer_name": "Adam",
         "learning_rate": 2e-05,
         "epsilon": 1e-08
-      }
+      },
+      "metrics": [
+        "accuracy",
+        "f1_weighted",
+        "f1_macro"
+      ]
     }
   ]
 }
