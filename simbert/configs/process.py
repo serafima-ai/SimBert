@@ -68,7 +68,8 @@ def find_metric_packages(content):
 
 package_replacer = (
     ("models.dataset", "datasets"), ("processor.features", "features"), ("datasets.features", "datasets"),
-    ("datasets.processor", "datasets"), ("models.optimizer", "optimizers"), ("models.loss", "losses"))
+    ("datasets.processor", "datasets"), ("models.optimizer", "optimizers"), ("models.loss", "losses"),
+    ("models.trainer", "trainers"))
 
 
 def clean_package_name(name: str) -> str:
