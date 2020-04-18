@@ -31,6 +31,8 @@ class Model(Kernel, metaclass=ABCMeta):
 
         self.configs = configs
 
+        self.label = self.configs.get("label", self.__class__.__name__)
+
         self.loss_func = None
 
         self.trainer = None
@@ -40,7 +42,6 @@ class Model(Kernel, metaclass=ABCMeta):
         self.set_metrics()
 
         self.set_loss_func()
-
 
     @abstractmethod
     def predict(self, inputs):
@@ -140,6 +141,13 @@ class Model(Kernel, metaclass=ABCMeta):
 
         return validation_scores
 
+    def load_weights(self):
+        """"""
+
+    @classmethod
+    def load_from_checkpoint(cls, checkpoint_path: str, configs: DotMap = DotMap()):
+        """"""
+
     def ready_for_training(self) -> bool:
         if not self.train_dataset_ready():
 
@@ -186,3 +194,5 @@ class Model(Kernel, metaclass=ABCMeta):
 
         except ValueError as e:
             log.exception(e)
+
+        return None
