@@ -37,6 +37,8 @@ class Model(Kernel, metaclass=ABCMeta):
 
         self.trainer = None
 
+        self.test_results = {}
+
         self.set_trainer()
 
         self.set_metrics()
@@ -145,8 +147,9 @@ class Model(Kernel, metaclass=ABCMeta):
         """"""
 
     @classmethod
+    @abstractmethod
     def load_from_checkpoint(cls, checkpoint_path: str, configs: DotMap = DotMap()):
-        """"""
+        raise NotImplementedError
 
     def ready_for_training(self) -> bool:
         if not self.train_dataset_ready():
@@ -190,9 +193,27 @@ class Model(Kernel, metaclass=ABCMeta):
     def test(self):
         try:
             if self.ready_for_test():
-                return self.trainer.test(self)
+                self.trainer.test(self)
+
+                return self.test_results
 
         except ValueError as e:
             log.exception(e)
 
         return None
+
+    @staticmethod
+    def build_model(model_config: DotMap):
+
+        model_class = Kernel().get(model_config.model_name)
+
+        model = None
+
+        if type(model_config.checkpoint) is str:
+            log.warning("Loading from checkpoint")
+            model = model_class.load_from_checkpoint(checkpoint_path=model_config.checkpoint,
+                                                     configs=model_config)
+        if model is None:
+            model = model_class(configs=model_config)
+
+        return model
