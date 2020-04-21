@@ -4,6 +4,7 @@
       "model_name": "bert.BertForRanking",
       "tokenizer": "bert-base-multilingual-cased",
       "bert_model": "bert-base-multilingual-cased",
+      "checkpoint": "../ranker/models/antifreeze_for_9-12_layers.ckpt",
       "loss": {
         "loss_func_name": "CrossEntropyLoss"
       },
@@ -30,6 +31,12 @@
             "max_length": 368
           }
         }
+      },
+      "trainer": {
+        "trainer_name": "PytorchLightningTrainer",
+        "max_epochs": 1,
+        "gpus": -1,
+        "progress_bar_refresh_rate": 100
       },
       "optimizer": {
         "optimizer_name": "Adam",
