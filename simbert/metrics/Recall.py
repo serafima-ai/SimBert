@@ -3,7 +3,7 @@ from simbert.metrics.metric import Metric
 from sklearn.metrics import recall_score
 
 
-class Precision(Metric):
+class Recall(Metric):
 
     def evaluate(self, y_true, y_pred) -> recall_score:
         average = self.average if self.average is not None else 'binary'
