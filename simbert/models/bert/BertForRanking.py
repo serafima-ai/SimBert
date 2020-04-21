@@ -11,7 +11,7 @@ from simbert.datasets.processor import DataProcessor
 from simbert.optimizers.optimizer import Optimizer
 
 
-class BertForRanking(Model, SimbertLightningModule):
+class BertForRanking(SimbertLightningModule, Model):
 
     def __init__(self, configs: DotMap = DotMap(), *args, **kwargs):
         pl.LightningModule.__init__(self, *args, **kwargs)
@@ -170,6 +170,8 @@ class BertForRanking(Model, SimbertLightningModule):
             avg_metrics.update({'avg_' + key_name: torch.stack([x[key_name] for x in outputs]).mean()})
 
         tensorboard_logs = avg_metrics
+
+        self.test_results = avg_metrics
 
         return {**avg_metrics, **{'log': tensorboard_logs, 'progress_bar': tensorboard_logs}}
 
