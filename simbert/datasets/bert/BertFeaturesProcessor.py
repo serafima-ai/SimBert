@@ -9,7 +9,4 @@ class BertFeaturesProcessor(FeaturesProcessor):
                                             tokenizer,
                                             label_list=self.configs.labels,  # [0, 1]
                                             max_length=self.configs.max_length,  # 368
-                                            output_mode=output_mode,
-                                            pad_on_left=False,
-                                            pad_token=tokenizer.pad_token_id,
-                                            pad_token_segment_id=0)
+                                            output_mode=output_mode)
