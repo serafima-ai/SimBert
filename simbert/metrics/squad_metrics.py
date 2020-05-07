@@ -1,9 +1,7 @@
 import collections
 import json
 import math
-
 from transformers.data.metrics.squad_metrics import get_final_text
-
 from simbert.models.transformers import logger
 
 
