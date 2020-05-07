@@ -1,5 +1,3 @@
-from dotmap import DotMap
-
 from simbert.datasets.features import FeaturesProcessor
 from transformers import glue_convert_examples_to_features as convert_examples_to_features
 

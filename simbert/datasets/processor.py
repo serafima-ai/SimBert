@@ -8,9 +8,11 @@ import pandas as pd
 
 
 class DataProcessor(Kernel):
+
     FeaturesProcessor = None
 
     def __init__(self, configs: DotMap = DotMap()):
+
         self.configs = configs
 
         if type(self.configs.features.features_processor_name) is not DotMap:
@@ -29,10 +31,17 @@ class DataProcessor(Kernel):
         """"""
         pass
 
-    def get_dataset(self, path='') -> pd.DataFrame:
+    def get_dataset(self, path='', type='csv'):
         if path is '':
             path = self.configs.get('train_dataset', path)
-        return pd.read_csv(path, index_col=0)  # path: './ranker/train.csv'
+
+        if type == 'csv':
+            return pd.read_csv(path, index_col=0)  # path: './ranker/train.csv'
+
+        if type == 'json':
+            return path
+
+        return None
 
     def prepare_dataset(self, tokenizer):
         """"""

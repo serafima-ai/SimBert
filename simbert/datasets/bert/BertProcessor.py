@@ -9,17 +9,17 @@ class BertProcessor(DataProcessor):
 
     def get_train_examples(self, df):
         """See base class."""
-        return self.__create_examples(df, "train")
+        return self.create_examples(df, "train")
 
     def get_dev_examples(self, df):
         """See base class."""
-        return self.__create_examples(df, "dev_matched")
+        return self.create_examples(df, "dev_matched")
 
     def get_test_examples(self, df):
         """See base class."""
-        return self.__create_examples(df, "test")
+        return self.create_examples(df, "test")
 
-    def __create_examples(self, df, set_type):
+    def create_examples(self, df, set_type):
         """Creates examples for the training and dev sets."""
         examples = []
         for idx, row in df.iterrows():
@@ -52,7 +52,7 @@ class BertProcessor(DataProcessor):
         if type(self.configs.train_dataset) is not DotMap:
             bert_train_dataloader, bert_val_dataloader, bert_test_dataloader = self.prepare_train_dataset(tokenizer)
 
-        bert_test_dataloader = self.__resolve_test_dataset(bert_test_dataloader, tokenizer)
+        bert_test_dataloader = self.resolve_test_dataset(bert_test_dataloader, tokenizer)
 
         return bert_train_dataloader, bert_val_dataloader, bert_test_dataloader
 
@@ -86,7 +86,7 @@ class BertProcessor(DataProcessor):
 
         return bert_train_dataloader, bert_val_dataloader, bert_test_dataloader
 
-    def __resolve_test_dataset(self, bert_test_dataloader, tokenizer):
+    def resolve_test_dataset(self, bert_test_dataloader, tokenizer):
         if type(self.configs.test_dataset) is not DotMap:
             test_dataframe = self.get_dataset(self.configs.test_dataset)
 
