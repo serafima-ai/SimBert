@@ -137,9 +137,14 @@ class Model(Kernel, metaclass=ABCMeta):
 
         for _, metric in self.metrics.items():
             val = metric.evaluate(y_true, y_pred)
-            if apply is not None:
+            if type(val) is not dict and apply is not None:
                 val = apply(val)
-            validation_scores.update({stage + metric.get_metric_name(): val})
+
+            if type(val) is dict:
+                for m, value in val.items():
+                    validation_scores.update({stage + m: value})
+            else:
+                validation_scores.update({stage + metric.get_metric_name(): val})
 
         return validation_scores
 
