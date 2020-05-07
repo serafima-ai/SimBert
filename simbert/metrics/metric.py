@@ -6,7 +6,7 @@ from simbert.kernel import Kernel
 class Metric(Kernel):
     configs = None
 
-    avg_supported = [None, 'binary', 'micro', 'macro', 'samples', 'weighted']
+    avg_supported = [None, 'binary', 'micro', 'macro', 'samples', 'weighted', 'noAns', 'hasAns']
 
     def __init__(self, configs: DotMap = DotMap(), name: str = ''):
         self.configs = configs
@@ -24,7 +24,7 @@ class Metric(Kernel):
         """"""
 
     def average_from_name(self, name: str) -> str:
-        return name.lower().split('_')[-1]
+        return name.split('_')[-1]
 
     def get_supported_avg(self) -> list:
         return self.avg_supported

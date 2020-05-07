@@ -254,3 +254,6 @@ def _compute_softmax(scores):
     for score in exp_scores:
         probs.append(score / total_sum)
     return probs
+
+def calculate_answer_no_answer(metric, qid_list):
+    return sum(metric[k] for k in qid_list) / len(qid_list)
